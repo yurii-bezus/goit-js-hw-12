@@ -34,8 +34,8 @@ form.addEventListener('submit', async e => {
   }
 
   currentPage = 1;
-  clearGallery(); // Очищуємо галерею для нового пошуку
-  hideLoadMoreButton(); // Ховаємо кнопку при новому пошуку
+  clearGallery();
+  hideLoadMoreButton();
   showLoader();
 
   try {
@@ -75,9 +75,8 @@ loadMoreBtn.addEventListener('click', async () => {
   try {
     const data = await getImagesByQuery(currentQuery, currentPage);
 
-    createGallery(data.hits); // додаємо нові зображення
+    createGallery(data.hits);
 
-    // Прокрутка з невеликим затриманням, щоб браузер встиг відрендерити
     setTimeout(() => {
       const firstCard = document.querySelector('.gallery li');
       if (!firstCard) return;
@@ -87,7 +86,7 @@ loadMoreBtn.addEventListener('click', async () => {
         top: height * 2,
         behavior: 'smooth',
       });
-    }, 100); // 100 мс - оптимальний час, можна регулювати
+    }, 100);
 
     const shownImages = document.querySelectorAll('.gallery li').length;
     if (shownImages >= totalHits) {

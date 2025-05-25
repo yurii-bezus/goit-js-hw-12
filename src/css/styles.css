@@ -151,5 +151,4 @@ body {
 }
 .hidden {
   display: none !important;
-  /* ❗ Страховка, навіть якщо JS щось зламає */
 }
