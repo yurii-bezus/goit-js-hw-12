@@ -94,7 +94,6 @@ body {
   display: block;
 }
 
-
 .gallery div {
   display: flex;
   justify-content: space-between;
@@ -121,14 +120,36 @@ body {
   margin: 24px auto;
   display: block;
   animation: spin 1s linear infinite;
-}
-
-.hidden {
-  display: none;
+  text-align: center;
 }
 
 @keyframes spin {
   to {
     transform: rotate(360deg);
   }
+}
+
+.hidden {
+  display: none;
+}
+
+.load-more {
+  display: block;
+  margin: 20px auto;
+  padding: 10px 30px;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: #4e75ff;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  transition: background-color 0.3s;
+}
+
+.load-more:hover {
+  background-color: #6c8cff;
+}
+.hidden {
+  display: none !important;
+  /* ❗ Страховка, навіть якщо JS щось зламає */
 }

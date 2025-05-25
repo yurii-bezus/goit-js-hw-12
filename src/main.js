@@ -4,17 +4,27 @@ import {
   clearGallery,
   showLoader,
   hideLoader,
+  showLoadMoreButton,
+  hideLoadMoreButton,
 } from './js/render-functions.js';
+
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
 
 const form = document.querySelector('.form');
+const loadMoreBtn = document.querySelector('.load-more');
+
+let currentPage = 1;
+let currentQuery = '';
+let totalHits = 0;
+
+hideLoadMoreButton();
 
 form.addEventListener('submit', async e => {
   e.preventDefault();
+  currentQuery = e.currentTarget.elements['search-text'].value.trim();
 
-  const query = e.currentTarget.elements['search-text'].value.trim();
-  if (!query) {
+  if (!currentQuery) {
     iziToast.warning({
       title: 'Warning',
       message: 'Please enter a search query.',
@@ -23,11 +33,15 @@ form.addEventListener('submit', async e => {
     return;
   }
 
+  currentPage = 1;
+  clearGallery(); // Очищуємо галерею для нового пошуку
+  hideLoadMoreButton(); // Ховаємо кнопку при новому пошуку
   showLoader();
-  clearGallery();
 
   try {
-    const data = await getImagesByQuery(query);
+    const data = await getImagesByQuery(currentQuery, currentPage);
+    totalHits = data.totalHits;
+
     if (data.hits.length === 0) {
       iziToast.info({
         title: 'Info',
@@ -35,8 +49,54 @@ form.addEventListener('submit', async e => {
           'Sorry, there are no images matching your search query. Please try again!',
         position: 'topRight',
       });
-    } else {
-      createGallery(data.hits);
+      return;
+    }
+
+    createGallery(data.hits);
+    if (totalHits > data.hits.length) {
+      showLoadMoreButton();
+    }
+  } catch (error) {
+    console.error(error);
+    iziToast.error({
+      title: 'Error',
+      message: 'Something went wrong. Please try again later.',
+      position: 'topRight',
+    });
+  } finally {
+    hideLoader();
+  }
+});
+
+loadMoreBtn.addEventListener('click', async () => {
+  currentPage += 1;
+  showLoader();
+
+  try {
+    const data = await getImagesByQuery(currentQuery, currentPage);
+
+    createGallery(data.hits); // додаємо нові зображення
+
+    // Прокрутка з невеликим затриманням, щоб браузер встиг відрендерити
+    setTimeout(() => {
+      const firstCard = document.querySelector('.gallery li');
+      if (!firstCard) return;
+      const { height } = firstCard.getBoundingClientRect();
+
+      window.scrollBy({
+        top: height * 2,
+        behavior: 'smooth',
+      });
+    }, 100); // 100 мс - оптимальний час, можна регулювати
+
+    const shownImages = document.querySelectorAll('.gallery li').length;
+    if (shownImages >= totalHits) {
+      hideLoadMoreButton();
+      iziToast.info({
+        title: 'Info',
+        message: "We're sorry, but you've reached the end of search results.",
+        position: 'topRight',
+      });
     }
   } catch (error) {
     console.error(error);
